@@ -34,7 +34,9 @@ import com.flyco.tablayout.widget.MsgView;
 
 import java.util.ArrayList;
 
-/** 没有继承HorizontalScrollView不能滑动,对于ViewPager无依赖 */
+/**
+ * 没有继承HorizontalScrollView不能滑动,对于ViewPager无依赖
+ */
 public class CommonTabLayout extends FrameLayout implements ValueAnimator.AnimatorUpdateListener {
     private Context mContext;
     private ArrayList<CustomTabEntity> mTabEntitys = new ArrayList<>();
@@ -42,7 +44,9 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
     private int mCurrentTab;
     private int mLastTab;
     private int mTabCount;
-    /** 用于绘制显示器 */
+    /**
+     * 用于绘制显示器
+     */
     private Rect mIndicatorRect = new Rect();
     private GradientDrawable mIndicatorDrawable = new GradientDrawable();
 
@@ -59,7 +63,9 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
     private boolean mTabSpaceEqual;
     private float mTabWidth;
 
-    /** indicator */
+    /**
+     * indicator
+     */
     private int mIndicatorColor;
     private float mIndicatorHeight;
     private float mIndicatorWidth;
@@ -73,27 +79,36 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
     private boolean mIndicatorBounceEnable;
     private int mIndicatorGravity;
 
-    /** underline */
+    /**
+     * underline
+     */
     private int mUnderlineColor;
     private float mUnderlineHeight;
     private int mUnderlineGravity;
 
-    /** divider */
+    /**
+     * divider
+     */
     private int mDividerColor;
     private float mDividerWidth;
     private float mDividerPadding;
 
-    /** title */
+    /**
+     * title
+     */
     private static final int TEXT_BOLD_NONE = 0;
     private static final int TEXT_BOLD_WHEN_SELECT = 1;
     private static final int TEXT_BOLD_BOTH = 2;
-    private float mTextsize;
+    private float mTextSelectSize;
+    private float mTextUnSelectSize;
     private int mTextSelectColor;
-    private int mTextUnselectColor;
+    private int mTextUnSelectColor;
     private int mTextBold;
     private boolean mTextAllCaps;
 
-    /** icon */
+    /**
+     * icon
+     */
     private boolean mIconVisible;
     private int mIconGravity;
     private float mIconWidth;
@@ -102,7 +117,9 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
 
     private int mHeight;
 
-    /** anim */
+    /**
+     * anim
+     */
     private ValueAnimator mValueAnimator;
     private OvershootInterpolator mInterpolator = new OvershootInterpolator(1.5f);
 
@@ -171,9 +188,10 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         mDividerWidth = ta.getDimension(R.styleable.CommonTabLayout_tl_divider_width, dp2px(0));
         mDividerPadding = ta.getDimension(R.styleable.CommonTabLayout_tl_divider_padding, dp2px(12));
 
-        mTextsize = ta.getDimension(R.styleable.CommonTabLayout_tl_textsize, sp2px(13f));
+        mTextSelectSize = ta.getDimension(R.styleable.CommonTabLayout_tl_textSelectSize, sp2px(13f));
+        mTextUnSelectSize = ta.getDimension(R.styleable.CommonTabLayout_tl_textUnSelectSize, mTextSelectSize);
         mTextSelectColor = ta.getColor(R.styleable.CommonTabLayout_tl_textSelectColor, Color.parseColor("#ffffff"));
-        mTextUnselectColor = ta.getColor(R.styleable.CommonTabLayout_tl_textUnselectColor, Color.parseColor("#AAffffff"));
+        mTextUnSelectColor = ta.getColor(R.styleable.CommonTabLayout_tl_textUnSelectColor, Color.parseColor("#AAffffff"));
         mTextBold = ta.getInt(R.styleable.CommonTabLayout_tl_textBold, TEXT_BOLD_NONE);
         mTextAllCaps = ta.getBoolean(R.styleable.CommonTabLayout_tl_textAllCaps, false);
 
@@ -201,13 +219,17 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         notifyDataSetChanged();
     }
 
-    /** 关联数据支持同时切换fragments */
+    /**
+     * 关联数据支持同时切换fragments
+     */
     public void setTabData(ArrayList<CustomTabEntity> tabEntitys, FragmentActivity fa, int containerViewId, ArrayList<Fragment> fragments) {
         mFragmentChangeManager = new FragmentChangeManager(fa.getSupportFragmentManager(), containerViewId, fragments);
         setTabData(tabEntitys);
     }
 
-    /** 更新数据 */
+    /**
+     * 更新数据
+     */
     public void notifyDataSetChanged() {
         mTabsContainer.removeAllViews();
         this.mTabCount = mTabEntitys.size();
@@ -230,7 +252,9 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         updateTabStyles();
     }
 
-    /** 创建并添加tab */
+    /**
+     * 创建并添加tab
+     */
     private void addTab(final int position, View tabView) {
         TextView tv_tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
         tv_tab_title.setText(mTabEntitys.get(position).getTabTitle());
@@ -269,8 +293,8 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
             View tabView = mTabsContainer.getChildAt(i);
             tabView.setPadding((int) mTabPadding, 0, (int) mTabPadding, 0);
             TextView tv_tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
-            tv_tab_title.setTextColor(i == mCurrentTab ? mTextSelectColor : mTextUnselectColor);
-            tv_tab_title.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextsize);
+            tv_tab_title.setTextColor(i == mCurrentTab ? mTextSelectColor : mTextUnSelectColor);
+            tv_tab_title.setTextSize(TypedValue.COMPLEX_UNIT_PX, i == mCurrentTab ? mTextSelectSize : mTextUnSelectSize);
 //            tv_tab_title.setPadding((int) mTabPadding, 0, (int) mTabPadding, 0);
             if (mTextAllCaps) {
                 tv_tab_title.setText(tv_tab_title.getText().toString().toUpperCase());
@@ -280,6 +304,8 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
                 tv_tab_title.getPaint().setFakeBoldText(true);
             } else if (mTextBold == TEXT_BOLD_NONE) {
                 tv_tab_title.getPaint().setFakeBoldText(false);
+            } else if (mTextBold == TEXT_BOLD_WHEN_SELECT) {
+                tv_tab_title.getPaint().setFakeBoldText(i == mCurrentTab);
             }
 
             ImageView iv_tab_icon = (ImageView) tabView.findViewById(R.id.iv_tab_icon);
@@ -312,7 +338,8 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
             View tabView = mTabsContainer.getChildAt(i);
             final boolean isSelect = i == position;
             TextView tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
-            tab_title.setTextColor(isSelect ? mTextSelectColor : mTextUnselectColor);
+            tab_title.setTextColor(isSelect ? mTextSelectColor : mTextUnSelectColor);
+            tab_title.setTextSize(TypedValue.COMPLEX_UNIT_PX, isSelect ? mTextSelectSize : mTextUnSelectSize);
             ImageView iv_tab_icon = (ImageView) tabView.findViewById(R.id.iv_tab_icon);
             CustomTabEntity tabEntity = mTabEntitys.get(i);
             iv_tab_icon.setImageResource(isSelect ? tabEntity.getTabSelectedIcon() : tabEntity.getTabUnselectedIcon());
@@ -593,8 +620,25 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         invalidate();
     }
 
-    public void setTextsize(float textsize) {
-        this.mTextsize = sp2px(textsize);
+    public void setTextSize(float selectSize, float unSelectSize) {
+        this.mTextSelectSize = sp2px(selectSize);
+        this.mTextUnSelectSize = sp2px(unSelectSize);
+        updateTabStyles();
+    }
+
+    public void setTextSelectSize(float selectSize) {
+        this.mTextSelectSize = sp2px(selectSize);
+        updateTabStyles();
+    }
+
+    public void setTextUnSelectSize(float unSelectSize) {
+        this.mTextUnSelectSize = sp2px(unSelectSize);
+        updateTabStyles();
+    }
+
+    public void setTextColor(int selectColor, int unSelectColor) {
+        this.mTextSelectColor = selectColor;
+        this.mTextUnSelectColor = unSelectColor;
         updateTabStyles();
     }
 
@@ -603,8 +647,8 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         updateTabStyles();
     }
 
-    public void setTextUnselectColor(int textUnselectColor) {
-        this.mTextUnselectColor = textUnselectColor;
+    public void setTextUnSelectColor(int textUnSelectColor) {
+        this.mTextUnSelectColor = textUnSelectColor;
         updateTabStyles();
     }
 
@@ -732,16 +776,8 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         return mDividerPadding;
     }
 
-    public float getTextsize() {
-        return mTextsize;
-    }
-
     public int getTextSelectColor() {
         return mTextSelectColor;
-    }
-
-    public int getTextUnselectColor() {
-        return mTextUnselectColor;
     }
 
     public int getTextBold() {
@@ -859,7 +895,7 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         MsgView tipView = (MsgView) tabView.findViewById(R.id.rtv_msg_tip);
         if (tipView != null) {
             TextView tv_tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
-            mTextPaint.setTextSize(mTextsize);
+            mTextPaint.setTextSize(mTextSelectSize);
             float textWidth = mTextPaint.measureText(tv_tab_title.getText().toString());
             float textHeight = mTextPaint.descent() - mTextPaint.ascent();
             MarginLayoutParams lp = (MarginLayoutParams) tipView.getLayoutParams();
@@ -885,7 +921,9 @@ public class CommonTabLayout extends FrameLayout implements ValueAnimator.Animat
         }
     }
 
-    /** 当前类只提供了少许设置未读消息属性的方法,可以通过该方法获取MsgView对象从而各种设置 */
+    /**
+     * 当前类只提供了少许设置未读消息属性的方法,可以通过该方法获取MsgView对象从而各种设置
+     */
     public MsgView getMsgView(int position) {
         if (position >= mTabCount) {
             position = mTabCount - 1;
