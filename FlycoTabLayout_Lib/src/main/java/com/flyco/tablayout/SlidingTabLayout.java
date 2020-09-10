@@ -358,7 +358,6 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
 
     @Override
     public void onPageSelected(int position) {
-        this.mCurrentTab = position;
         updateTabSelection(position);
     }
 
